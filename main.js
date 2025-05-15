@@ -5,12 +5,12 @@ const express    = require("express");
 const bodyParser = require("body-parser");
 const WebSocket  = require("ws");
 
-// Порты и список пиров (P2P)
+
 const http_port    = process.env.HTTP_PORT || 3001;
 const p2p_port     = process.env.P2P_PORT  || 6001;
 const initialPeers = process.env.PEERS ? process.env.PEERS.split(',') : [];
 
-// Класс блока
+
 class Block {
   constructor(index, previousHash, timestamp, data, hash, difficulty, nonce) {
     this.index        = index;
@@ -23,7 +23,7 @@ class Block {
   }
 }
 
-// Генезис‑блок
+
 const getGenesisBlock = () => 
   new Block(
     0,
@@ -37,7 +37,7 @@ const getGenesisBlock = () =>
 
 let blockchain = [ getGenesisBlock() ];
 
-// Проверка простоты (для кастомного PoW)
+
 function isPrime(num) {
   if (num < 2) return false;
   if (num % 2 === 0 && num !== 2) return false;
@@ -48,12 +48,12 @@ function isPrime(num) {
   return true;
 }
 
-// Расчёт SHA256‑хеша
+
 function calculateHash(index, previousHash, timestamp, data, nonce) {
   return CryptoJS.SHA256(index + previousHash + timestamp + data + nonce).toString();
 }
 
-// Создание нового блока по «майнингу»
+
 function mineBlock(blockData) {
   const previousBlock = blockchain[blockchain.length - 1];
   const nextIndex     = previousBlock.index + 1;
@@ -61,7 +61,7 @@ function mineBlock(blockData) {
   let timestamp       = Math.floor(Date.now() / 1000);
   let hash;
 
-  // Пока не найдём простое число в последних 4 hex‑символах
+
   while (true) {
     timestamp = Math.floor(Date.now() / 1000);
     hash = calculateHash(nextIndex, previousBlock.hash, timestamp, blockData, nonce);
@@ -80,7 +80,7 @@ function mineBlock(blockData) {
   return new Block(nextIndex, previousBlock.hash, timestamp, blockData, hash, /*difficulty*/ null, nonce);
 }
 
-// Добавление блока в цепочку (с проверкой)
+
 function calculateHashForBlock(block) {
   return calculateHash(block.index, block.previousHash, block.timestamp, block.data, block.nonce);
 }
@@ -105,7 +105,7 @@ function addBlock(newBlock) {
   }
 }
 
-// Замена цепочки, если новая длиннее и валидна
+
 function isValidChain(chain) {
   if (JSON.stringify(chain[0]) !== JSON.stringify(getGenesisBlock())) {
     return false;
@@ -128,7 +128,6 @@ function replaceChain(newBlocks) {
   }
 }
 
-// P2P‑обмен
 const sockets = [];
 const MessageType = {
   QUERY_LATEST:    0,
@@ -214,7 +213,6 @@ function broadcast(message) {
   sockets.forEach(s => write(s, message));
 }
 
-// Сообщения P2P
 function queryChainLengthMsg() {
   return { type: MessageType.QUERY_LATEST };
 }
@@ -228,7 +226,7 @@ function responseLatestMsg() {
   return { type: MessageType.RESPONSE_CHAIN, data: JSON.stringify([blockchain[blockchain.length - 1]]) };
 }
 
-// HTTP‑сервер для клиентов и Postman
+
 function initHttpServer() {
   const app = express();
   app.use(bodyParser.json());
