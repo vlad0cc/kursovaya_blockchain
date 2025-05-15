@@ -6,8 +6,8 @@ const bodyParser = require("body-parser");
 const WebSocket  = require("ws");
 
 
-const http_port    = process.env.HTTP_PORT || 3001;
-const p2p_port     = process.env.P2P_PORT  || 6001;
+const http_port    = process.env.HTTP_PORT || 5001;
+const p2p_port     = process.env.P2P_PORT  || 6601;
 const initialPeers = process.env.PEERS ? process.env.PEERS.split(',') : [];
 
 
